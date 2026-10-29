@@ -1,4 +1,4 @@
-# AutomataArcade
+# Lenguaje 3 Challenger 
 
 Juego desarrollado en C++ con SFML, enfocado en un modo competitivo de dos jugadores con niveles, preguntas, lógica de puntuación y persistencia de resultados en una base de datos PostgreSQL de Neon.
 
