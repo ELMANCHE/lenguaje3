@@ -60,6 +60,19 @@ void GameEngine::init() {
         menuBackgroundSprite->setScale(sf::Vector2f(scaleX, scaleY));
     }
 
+    // Load final score background image
+    if (!finalBackgroundTexture.loadFromFile("sources/fotomenufinal.jpeg")) {
+        // Si falla, continuar sin imagen de fondo
+    } else {
+        finalBackgroundSprite = std::make_unique<sf::Sprite>(finalBackgroundTexture);
+        // Scale image to fit window
+        sf::Vector2u textureSize = finalBackgroundTexture.getSize();
+        sf::Vector2u windowSize = window.getSize();
+        float scaleX = static_cast<float>(windowSize.x) / textureSize.x;
+        float scaleY = static_cast<float>(windowSize.y) / textureSize.y;
+        finalBackgroundSprite->setScale(sf::Vector2f(scaleX, scaleY));
+    }
+
     isRunning = true;
     playMenuAudio();
 }
@@ -252,6 +265,17 @@ void GameEngine::renderExplanationScreen() {
 
 void GameEngine::renderFinalScore() {
     window.clear(sf::Color(10, 10, 10));
+
+    // Draw background image with dark overlay
+    if (finalBackgroundSprite) {
+        window.draw(*finalBackgroundSprite);
+
+        // Dark overlay (semi-transparent black rectangle)
+        sf::RectangleShape darkOverlay(sf::Vector2f(static_cast<float>(window.getSize().x),
+                                                    static_cast<float>(window.getSize().y)));
+        darkOverlay.setFillColor(sf::Color(0, 0, 0, 180)); // Alpha 180 para oscurecer
+        window.draw(darkOverlay);
+    }
 
     sf::Text titleText(gameFont);
     titleText.setString("RESULTADOS FINALES");
