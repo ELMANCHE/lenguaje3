@@ -222,6 +222,43 @@ void GameEngine::renderMainMenu() {
     buttonText.setOrigin(sf::Vector2f(buttonBounds.size.x * 0.5f, 0.f));
     buttonText.setPosition(sf::Vector2f(640.f, 465.f));
     window.draw(buttonText);
+
+    // Leaderboard box (right bottom)
+    sf::RectangleShape leaderboardBox(sf::Vector2f(250.f, 200.f));
+    leaderboardBox.setPosition(sf::Vector2f(1000.f, 500.f));
+    leaderboardBox.setFillColor(sf::Color(20, 20, 40, 200));
+    leaderboardBox.setOutlineThickness(2.f);
+    leaderboardBox.setOutlineColor(sf::Color(0, 255, 255));
+    window.draw(leaderboardBox);
+
+    sf::Text leaderboardTitle(gameFont);
+    leaderboardTitle.setString("MEJORES PUNTAJES");
+    leaderboardTitle.setCharacterSize(16);
+    leaderboardTitle.setFillColor(sf::Color(255, 255, 0));
+    leaderboardTitle.setPosition(sf::Vector2f(1010.f, 510.f));
+    window.draw(leaderboardTitle);
+
+    // Placeholder for leaderboard entries
+    sf::Text entry1(gameFont);
+    entry1.setString("1. -");
+    entry1.setCharacterSize(14);
+    entry1.setFillColor(sf::Color(255, 255, 255));
+    entry1.setPosition(sf::Vector2f(1010.f, 540.f));
+    window.draw(entry1);
+
+    sf::Text entry2(gameFont);
+    entry2.setString("2. -");
+    entry2.setCharacterSize(14);
+    entry2.setFillColor(sf::Color(255, 255, 255));
+    entry2.setPosition(sf::Vector2f(1010.f, 560.f));
+    window.draw(entry2);
+
+    sf::Text entry3(gameFont);
+    entry3.setString("3. -");
+    entry3.setCharacterSize(14);
+    entry3.setFillColor(sf::Color(255, 255, 255));
+    entry3.setPosition(sf::Vector2f(1010.f, 580.f));
+    window.draw(entry3);
 }
 
 void GameEngine::renderExplanationScreen() {
