@@ -1,8 +1,9 @@
 #include "GameEngine.h"
+#include "LevelIsometric.h"
 #include <chrono>
 
 GameEngine::GameEngine(int width, int height)
-    : window(sf::VideoMode(sf::Vector2u(width, height)), "Automata Arcade: The Chomsky Challenge"),
+    : window(sf::VideoMode(sf::Vector2u(width, height)), "programacion 3 challenger"),
     isRunning(false)
 {
     window.setFramerateLimit(60);
@@ -199,140 +200,54 @@ void GameEngine::renderMainMenu() {
     p2Count.setFillColor(sf::Color(200, 200, 200));
     p2Count.setPosition(sf::Vector2f(760.f, 345.f));
     window.draw(p2Count);
+
+    // Start button
+    sf::RectangleShape button(sf::Vector2f(300.f, 60.f));
+    button.setPosition(sf::Vector2f(490.f, 450.f));
+    button.setFillColor(sf::Color(200, 0, 0));
+    button.setOutlineThickness(3.f);
+    button.setOutlineColor(sf::Color(255, 255, 255));
+    window.draw(button);
+
+    sf::Text buttonText(gameFont);
+    buttonText.setString("JUGAR");
+    buttonText.setCharacterSize(24);
+    buttonText.setFillColor(sf::Color(255, 255, 255));
+    buttonText.setStyle(sf::Text::Bold);
+    sf::FloatRect buttonBounds = buttonText.getLocalBounds();
+    buttonText.setOrigin(sf::Vector2f(buttonBounds.size.x * 0.5f, 0.f));
+    buttonText.setPosition(sf::Vector2f(640.f, 465.f));
+    window.draw(buttonText);
 }
 
 void GameEngine::renderExplanationScreen() {
     window.clear(sf::Color::Black);
 
-    if (context.currentLevelIndex == 2) {
-        auto drawLine = [&](const std::string& text, float y, unsigned size, sf::Color color) {
-            sf::Text line(gameFont);
-            line.setString(text);
-            line.setCharacterSize(size);
-            line.setFillColor(color);
-            line.setPosition(sf::Vector2f(40.f, y));
-            window.draw(line);
-        };
+    // Instrucciones del Nivel 4
+    auto drawLine = [&](const std::string& text, float y, unsigned size, sf::Color color) {
+        sf::Text line(gameFont);
+        line.setString(text);
+        line.setCharacterSize(size);
+        line.setFillColor(color);
+        line.setPosition(sf::Vector2f(40.f, y));
+        window.draw(line);
+    };
 
-        drawLine("SECTOR 2 - RECONOCIMIENTO DE LENGUAJES", 25.f, 26, sf::Color(0, 255, 255));
-        drawLine("", 55.f, 16, sf::Color::White);
-        drawLine("Expresiones Regulares (ER):", 75.f, 20, sf::Color(0, 255, 0));
-        drawLine("Patrones que describen lenguajes con union, concatenacion y la estrella de Kleene.", 105.f, 18, sf::Color(0, 255, 0));
-        drawLine("", 135.f, 16, sf::Color::White);
-        drawLine("Gramaticas Libres de Contexto (GLC):", 155.f, 20, sf::Color(0, 255, 0));
-        drawLine("Reglas que generan lenguajes reemplazando simbolos sin importar lo que los rodea.", 185.f, 18, sf::Color(0, 255, 0));
-        drawLine("", 215.f, 16, sf::Color::White);
-        drawLine("Como jugar:", 235.f, 22, sf::Color(255, 255, 0));
-        drawLine("1. Lee la pregunta de arriba y las tres respuestas con su color:", 265.f, 18, sf::Color(255, 255, 0));
-        drawLine("   [MAGENTA], [CYAN] y [AMARILLO].", 295.f, 18, sf::Color(255, 255, 0));
-        drawLine("2. En el piso hay tres cuadros vacios con esos mismos colores.", 325.f, 18, sf::Color(255, 255, 0));
-        drawLine("3. Tienes 10 segundos para mover tu personaje al cuadro correcto.", 355.f, 18, sf::Color(255, 255, 0));
-        drawLine("", 385.f, 16, sf::Color::White);
-        drawLine("Jugador 1: WASD   |   Jugador 2: Flechas   |   +15 pts por acierto", 415.f, 18, sf::Color(0, 255, 255));
-        drawLine("[ Presiona ENTER para comenzar el nivel ]", 660.f, 20, sf::Color(0, 255, 255));
-        return;
-    }
-
-    if (context.currentLevelIndex == 3) {
-        auto drawLine = [&](const std::string& text, float y, unsigned size, sf::Color color) {
-            sf::Text line(gameFont);
-            line.setString(text);
-            line.setCharacterSize(size);
-            line.setFillColor(color);
-            line.setPosition(sf::Vector2f(40.f, y));
-            window.draw(line);
-        };
-
-        drawLine("SISTEMA REBOOT: INGRESO AL SECTOR 3 - MEMORIA SIMPLIFICADA (LIFO)", 20.f, 24, sf::Color(0, 255, 255));
-        drawLine("", 50.f, 16, sf::Color::White);
-        drawLine("AUTOMATAS DE PILA (AP):", 70.f, 20, sf::Color(0, 255, 0));
-        drawLine("Extienden los autómatas finitos con una pila auxiliar LIFO:", 100.f, 18, sf::Color(0, 255, 0));
-        drawLine("el ultimo en entrar (Push) es el primero en salir (Pop).", 130.f, 18, sf::Color(0, 255, 0));
-        drawLine("", 160.f, 16, sf::Color::White);
-        drawLine("MECANICA DEL DESAFIO (lee antes de que inicie el tiempo):", 180.f, 20, sf::Color(255, 255, 0));
-        drawLine("", 210.f, 16, sf::Color::White);
-        drawLine("- Las pilas siguen LIFO? SI -> cuadrado [MAGENTA]", 230.f, 18, sf::Color(255, 255, 0));
-        drawLine("- Apilas A, B, C. Cual sale primero? La 'C' -> [CYAN]", 260.f, 18, sf::Color(255, 255, 0));
-        drawLine("- Operacion para sacar el tope? POP -> [AMARILLO]", 290.f, 18, sf::Color(255, 255, 0));
-        drawLine("", 320.f, 16, sf::Color::White);
-        drawLine("10 segundos por ronda. Parate en el cuadrado correcto del piso.", 340.f, 18, sf::Color(0, 255, 255));
-        drawLine("Jugador 1: WASD   |   Jugador 2: Flechas   |   +15 pts por acierto", 370.f, 18, sf::Color(0, 255, 255));
-        drawLine("[ Presiona ENTER para comenzar el nivel ]", 660.f, 20, sf::Color(0, 255, 255));
-        return;
-    }
-
-    if (context.currentLevelIndex == 4) {
-        auto drawLine = [&](const std::string& text, float y, unsigned size, sf::Color color) {
-            sf::Text line(gameFont);
-            line.setString(text);
-            line.setCharacterSize(size);
-            line.setFillColor(color);
-            line.setPosition(sf::Vector2f(40.f, y));
-            window.draw(line);
-        };
-
-        drawLine("SISTEMA REBOOT: INGRESO AL SECTOR 4 - LA CINTA DE TURING BINARIA", 15.f, 22, sf::Color(0, 255, 255));
-        drawLine("", 45.f, 14, sf::Color::White);
-        drawLine("REGLAS DEL CODIGO BINARIO:", 65.f, 20, sf::Color(0, 255, 0));
-        drawLine("Estas sobre la cinta de una Maquina de Turing de alta tension. El puente consta", 90.f, 16, sf::Color(0, 255, 0));
-        drawLine("de 4 filas. Cada paso es una decision binaria: bloque IZQUIERDO o DERECHO.", 115.f, 16, sf::Color(0, 255, 0));
-        drawLine("Una opcion procesa el algoritmo; la otra corrompe el sistema y destruye el bloque.", 140.f, 16, sf::Color(0, 255, 0));
-        drawLine("", 165.f, 14, sf::Color::White);
-        drawLine("GUIA SINTACTICA (LEER ANTES DE AVANZAR):", 185.f, 18, sf::Color(255, 255, 0));
-        drawLine("", 210.f, 14, sf::Color::White);
-        drawLine("FILA 1: Invertir \"[1][0][1]\" -> IZQUIERDA \"[0][1][0]\" (CORRECTA) | DERECHA \"[1][1][1]\"", 230.f, 16, sf::Color(255, 255, 0));
-        drawLine("FILA 2: Leer 0, escribir 1, mover R -> IZQUIERDA \"Borra cinta\" | DERECHA \"Escribe 1\" (CORRECTA)", 260.f, 16, sf::Color(255, 255, 0));
-        drawLine("FILA 3: Limite insuperable MT -> IZQUIERDA \"Problema de Parada\" (CORRECTA) | DERECHA \"Palindromo\"", 290.f, 16, sf::Color(255, 255, 0));
-        drawLine("FILA 4: Alfabeto MT Binaria -> IZQUIERDA \"{0,1}\" (CORRECTA) | DERECHA \"{A,B,C}\"", 320.f, 16, sf::Color(255, 255, 0));
-        drawLine("", 350.f, 14, sf::Color::White);
-        drawLine("10 segundos por fila. Si pisas el bloque glitcheado, desaparece y mueres.", 370.f, 16, sf::Color(0, 255, 255));
-        drawLine("Jugador 1: A/D = Izq/Der, W = Avanzar  |  Jugador 2: Flechas  |  +15 pts por acierto", 400.f, 16, sf::Color(0, 255, 255));
-        drawLine("[ Presiona ENTER para comenzar el nivel ]", 660.f, 20, sf::Color(0, 255, 255));
-        return;
-    }
-
-    std::string titulo, parrafo, instrucciones;
-    
-    if (context.currentLevelIndex == 1) {
-        titulo = "Automatas Finitos Deterministas (AFD) y No Deterministas (AFND)";
-        parrafo = "Un AFD tiene exactamente una transicion de salida para cada simbolo\ndel alfabeto desde cualquier estado. Un AFND puede tener multiples\ntransiciones con el mismo simbolo o saltos vacios (epsilon).";
-        instrucciones = "Veran 6 diagramas de autómatas, uno a la vez.\n"
-                         "Arriba aparece la pregunta: ¿Es AFD o es AFND?\n"
-                         "Tienen 10 segundos por pregunta.\n\n"
-                         "Jugador 1: Q = AFND  |  R = AFD\n"
-                         "Jugador 2: P = AFND  |  ENTER = AFD\n\n"
-                         "+10 puntos por acierto, -5 por error.";
-    }
-    
-    window.clear(sf::Color::Black);
-
-    sf::Text titleText(gameFont);
-    titleText.setString(titulo);
-    titleText.setCharacterSize(28);
-    titleText.setFillColor(sf::Color(0, 255, 255));
-    titleText.setPosition(sf::Vector2f(50.f, 30.f));
-    window.draw(titleText);
-
-    sf::Text parrafoText(gameFont);
-    parrafoText.setString(parrafo);
-    parrafoText.setCharacterSize(20);
-    parrafoText.setFillColor(sf::Color(0, 255, 0));
-    parrafoText.setPosition(sf::Vector2f(60.f, 100.f));
-    window.draw(parrafoText);
-
-    sf::Text instrText(gameFont);
-    instrText.setString(instrucciones);
-    instrText.setCharacterSize(20);
-    instrText.setFillColor(sf::Color(255, 255, 0));
-    instrText.setPosition(sf::Vector2f(60.f, 250.f));
-    window.draw(instrText);
-
-    sf::Text continueText(gameFont);
-    continueText.setString("[ Presione ENTER para comenzar el nivel ]");
-    continueText.setCharacterSize(24);
-    continueText.setFillColor(sf::Color(0, 255, 255));
-    continueText.setPosition(sf::Vector2f(300.f, 650.f));
-    window.draw(continueText);
+    drawLine("ADIVINA ADIVINA...O...MUERE!", 25.f, 28, sf::Color(255, 0, 0));
+    drawLine("", 55.f, 16, sf::Color::White);
+    drawLine("En este nivel, cada jugador avanza por su propio puente de cuatro filas", 75.f, 18, sf::Color(255, 255, 255));
+    drawLine("y, en cada una, debe responder las preguntas eligiendo el bloque de", 105.f, 18, sf::Color(255, 255, 255));
+    drawLine("la izquierda o el de la derecha; tienen 10 segundos para decidir", 135.f, 18, sf::Color(255, 255, 255));
+    drawLine("antes de que se evalúe la respuesta.", 165.f, 18, sf::Color(255, 255, 255));
+    drawLine("", 195.f, 16, sf::Color::White);
+    drawLine("Si eligen correctamente, pueden continuar a la siguiente fila y ganan puntos;", 215.f, 18, sf::Color(0, 255, 0));
+    drawLine("si pisan el bloque incorrecto, ese bloque desaparece y el jugador queda eliminado.", 245.f, 18, sf::Color(255, 100, 100));
+    drawLine("", 275.f, 16, sf::Color::White);
+    drawLine("Gana quien acumule más puntos, siempre que logre superar el reto.", 295.f, 18, sf::Color(255, 255, 0));
+    drawLine("", 325.f, 16, sf::Color::White);
+    drawLine("Jugador 1: A/D = Izq/Der, W = Avanzar  |  Jugador 2: Flechas Izq/Der, Arriba = Avanzar", 355.f, 16, sf::Color(0, 255, 255));
+    drawLine("ENTER = Confirmar elección", 385.f, 16, sf::Color(0, 255, 255));
+    drawLine("[ Presione ENTER para comenzar el nivel ]", 660.f, 20, sf::Color(0, 255, 255));
 }
 
 void GameEngine::renderFinalScore() {
@@ -470,35 +385,20 @@ void GameEngine::handleInput() {
                     // Cambiar entre campos
                     editingPlayer1 = !editingPlayer1;
                     editingPlayer2 = !editingPlayer2;
+                } else if (keyEvent->code == sf::Keyboard::Key::Enter) {
+                    // Presionar ENTER para ir a instrucciones
+                    if (!inputName1.empty() && !inputName2.empty()) {
+                        context.player1Name = inputName1;
+                        context.player2Name = inputName2;
+                        transitionToState(GameState::EXPLANATION_SCREEN);
+                    }
                 }
-                // ENTER no hace nada por ahora (sin botón de inicio)
             }
-            // Temporalmente deshabilitado - sin niveles
-            /*
             else if (context.currentState == GameState::EXPLANATION_SCREEN) {
                 if (keyEvent->code == sf::Keyboard::Key::Enter) {
-                    switch (context.currentLevelIndex) {
-                        case 1:
-                            transitionToState(GameState::LEVEL_1);
-                            currentLevel = std::make_unique<Level1>(context, gameFont);
-                            currentLevel->init();
-                            break;
-                        case 2:
-                            transitionToState(GameState::LEVEL_2);
-                            currentLevel = std::make_unique<LevelIsometric>(context, gameFont, 2);
-                            currentLevel->init();
-                            break;
-                        case 3:
-                            transitionToState(GameState::LEVEL_3);
-                            currentLevel = std::make_unique<LevelIsometric>(context, gameFont, 3);
-                            currentLevel->init();
-                            break;
-                        case 4:
-                            transitionToState(GameState::LEVEL_4);
-                            currentLevel = std::make_unique<LevelIsometric>(context, gameFont, 4);
-                            currentLevel->init();
-                            break;
-                    }
+                    transitionToState(GameState::LEVEL_4);
+                    currentLevel = std::make_unique<LevelIsometric>(context, gameFont, 4);
+                    currentLevel->init();
                 }
             }
             else if (context.currentState == GameState::FINAL_SCORE) {
@@ -515,7 +415,6 @@ void GameEngine::handleInput() {
                     currentLevel = nullptr;
                 }
             }
-            */
         }
     }
 }
@@ -533,23 +432,14 @@ void GameEngine::update(float dt) {
         }
     }
 
-    // Temporalmente deshabilitado - sin niveles
-    /*
     if (currentLevel) {
         currentLevel->update(dt);
 
         if (currentLevel->isFinished()) {
-            context.currentLevelIndex++;
-
-            if (context.currentLevelIndex > 4) {
-                transitionToState(GameState::FINAL_SCORE);
-            } else {
-                transitionToState(GameState::EXPLANATION_SCREEN);
-            }
+            transitionToState(GameState::FINAL_SCORE);
             currentLevel = nullptr;
         }
     }
-    */
 }
 
 void GameEngine::render() {
@@ -559,14 +449,9 @@ void GameEngine::render() {
         case GameState::MAIN_MENU:
             renderMainMenu();
             break;
-        // Temporalmente deshabilitado - sin niveles
-        /*
         case GameState::EXPLANATION_SCREEN:
             renderExplanationScreen();
             break;
-        case GameState::LEVEL_1:
-        case GameState::LEVEL_2:
-        case GameState::LEVEL_3:
         case GameState::LEVEL_4:
             if (currentLevel) {
                 currentLevel->draw(window);
@@ -575,7 +460,6 @@ void GameEngine::render() {
         case GameState::FINAL_SCORE:
             renderFinalScore();
             break;
-        */
         default:
             break;
     }
