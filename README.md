@@ -1,150 +1,103 @@
-# AutomataArcade
+# Lenguaje 3 Challenger
 
-Juego desarrollado en C++ con SFML, enfocado en un modo competitivo de dos jugadores con niveles, preguntas, lógica de puntuación y persistencia de resultados en una base de datos PostgreSQL de Neon.
+Lenguaje 3 Challenger es un videojuego arcade para dos jugadores desarrollado en C++ con SFML. La partida consiste en superar un nivel de preguntas y decisiones: cada jugador elige respuestas mientras avanza por un puente, y al finalizar se muestran los puntajes y el ganador. Los resultados se guardan en una base de datos PostgreSQL alojada en Neon y se consultan para mostrar el ranking.
 
-## Descripción general
+El proyecto se desarrolla y se ejecuta en **macOS**.
 
-AutomataArcade es un proyecto de programación en C++ para macOS que combina:
+## Capturas del juego
 
-- interfaz gráfica con SFML
-- lógica de juego por niveles
-- manejo de estados del juego (menú, explicación, nivel, final)
-- tablero isométrico y preguntas de respuesta binaria
-- puntaje y leaderboard
-- integración con Neon PostgreSQL para guardar resultados
+Las imágenes siguientes son capturas de las pantallas del programa y se muestran en el orden en que aparecen durante la partida.
 
-El proyecto se ha desarrollado pensando en una experiencia arcade tipo arena de decisiones, donde cada jugador debe responder preguntas, avanzar en un recorrido y competir por lograr la mayor puntuación posible.
+### 1. Menú principal
 
-## Arquitectura del proyecto
+![Captura del menú principal](sources/fotomenu.png)
 
-El sistema está organizado en capas funcionales y de presentación:
+Pantalla de inicio. Permite ingresar el nombre de ambos jugadores, consultar el ranking y comenzar la partida.
 
-### 1. Motor del juego
-Archivo principal: `GameEngine.cpp` / `GameEngine.h`
+### 2. Descripción e instrucciones
 
-`GameEngine` es el núcleo del programa. Se encarga de:
+![Captura de la pantalla de descripción e instrucciones](sources/descripcion.png)
 
-- crear y administrar la ventana de SFML
-- controlar los estados del juego
-- manejar la entrada del usuario
-- reproducir audio
-- cargar fondos y textos del menú
-- inicializar la base de datos
-- consultar y refrescar el ranking
-- finalizar partida y pasar a la pantalla final
+Antes de jugar aparece una pantalla con la explicación de las reglas y los controles.
 
-Los estados del juego definidos en `Common.h` son:
+### 3. Nivel del juego
 
-- `MAIN_MENU`
-- `EXPLANATION_SCREEN`
-- `LEVEL_1`, `LEVEL_2`, `LEVEL_3`, `LEVEL_4`
-- `FINAL_SCORE`
+![Captura del nivel del juego](sources/nivel.png)
 
-### 2. Lógica por niveles
-Archivo principal: `Level.h` / `LevelIsometric.h` / `LevelIsometric.cpp`
+Esta es la pantalla de juego. Los dos jugadores participan en el mismo nivel y utilizan sus controles para escoger una respuesta y avanzar por el puente.
 
-La lógica del juego se encapsula en la clase abstracta `Level`, mientras que `LevelIsometric` implementa la mecánica del nivel isométrico. Aquí se resuelven aspectos como:
+### 4. Puntajes finales
 
-- generación del escenario
-- carga de preguntas y textos
-- actualización del estado del nivel
-- detección de respuestas correctas o incorrectas
-- movimiento de los avatares
-- avance por filas o puentes
-- cálculo del puntaje final
-- control de fin de nivel
+![Captura de la pantalla final](sources/final.png)
 
-La estructura del proyecto hace que cada nivel pueda reutilizar la misma base de comportamiento, con reglas específicas según el tipo de escenario.
+Al finalizar la partida se presentan los puntajes de ambos jugadores y el resultado. Desde esta pantalla se puede volver al menú e iniciar otra partida.
 
-### 3. Persistencia de puntajes
-Archivo principal: `Database.h` / `Database.cpp`
+## Arquitectura
 
-La base de datos se abstrae en la clase `Database`, que permite:
+El programa separa el ciclo principal del juego, la lógica del nivel y las operaciones de persistencia.
 
-- conectar a PostgreSQL usando libpq
-- insertar resultados de jugadores
-- consultar los mejores puntajes
-- cerrar la conexión de forma segura
+### Motor y flujo de pantallas
 
-Se usa Neon como proveedor de PostgreSQL, y la tabla principal esperada es `public.jugadores` con columnas como:
+`main.cpp` crea e inicializa `GameEngine`. `GameEngine` administra la ventana de SFML, recibe la entrada, actualiza y dibuja la pantalla activa, y controla el cambio entre el menú, las instrucciones, el nivel único y los resultados finales. También gestiona los recursos visuales y el audio.
 
-- `id`
-- `nombre`
-- `puntaje`
-- `fecha`
+El contexto compartido de jugadores, puntajes y estado está definido en `Common.h`. La secuencia de pantallas es:
 
-### 4. Recursos visuales y assets
-Carpeta: `sources/`
+1. `MAIN_MENU`: ingreso de nombres y consulta del ranking.
+2. `EXPLANATION_SCREEN`: descripción de reglas y controles.
+3. `LEVEL_4`: ejecución del único nivel jugable del proyecto.
+4. `FINAL_SCORE`: presentación de puntajes y opción de volver al menú.
 
-Los recursos del proyecto se encuentran en la carpeta `sources/` y incluyen fondos, texturas y audio:
+El identificador `LEVEL_4` es el nombre interno utilizado actualmente por el código; el juego ofrece **un solo nivel jugable**, no cuatro niveles.
 
-- `fondomenu.jpeg` -> fondo del menú principal
-- `fotomenufinal.jpeg` -> fondo de la pantalla final
-- `pisonivel4.jpeg` -> superficie de nivel
-- `parednivel4.jpg` / `parednivel4.webp` -> elementos visuales del escenario
-- `audiojuego.mp3` -> música del juego
+### Nivel y reglas de juego
 
-## Flujo principal del juego
+`Level.h` define la interfaz común de un nivel (`init`, `update`, `draw` e `isFinished`). `LevelIsometric.h` y `LevelIsometric.cpp` implementan el nivel jugable: la escena, las preguntas, el puente de cuatro filas, los movimientos de los jugadores, la evaluación de respuestas y la finalización de la partida. `RobloxAvatar.h` contiene el avatar empleado por los jugadores y `IsoRenderer.h` reúne funciones de dibujo de elementos isométricos.
 
-1. El usuario ingresa el nombre de los dos jugadores en el menú principal.
-2. Se muestra la pantalla de instrucciones/descripción del nivel.
-3. Se inicia el juego en el nivel principal.
-4. Los jugadores avanzan y responden preguntas según la lógica del nivel.
-5. Al terminar la partida, el sistema guarda los puntajes en Neon.
-6. Se actualiza el leaderboard y se muestra la pantalla final con el ganador.
-7. Se puede reiniciar y volver al menú.
+Los controles que se muestran en las instrucciones son:
 
-## Capturas / referencias visuales del juego
+- Jugador 1: `A` y `D` para elegir izquierda o derecha; `W` para avanzar.
+- Jugador 2: flechas izquierda y derecha para elegir; flecha arriba para avanzar.
+- `Enter`: confirmar el inicio desde el menú y comenzar después de la pantalla de instrucciones.
+- `Tab`: cambiar entre los campos de nombre en el menú.
+- `R`: regresar al menú desde los resultados finales.
+- `Esc`: salir del juego.
 
-### Menú principal
+### Persistencia y ranking
 
-![Menú principal](sources/fondomenu.jpeg)
+`Database.h` y `Database.cpp` encapsulan la conexión a PostgreSQL mediante `libpq`. El motor consulta los tres mejores puntajes al iniciar y vuelve a consultar el ranking después de guardar los resultados de ambos jugadores al finalizar la partida.
 
-El menú principal presenta la pantalla inicial del juego con los nombres de los jugadores, la opción de comenzar y el leaderboard.
+La tabla utilizada por el programa es `public.jugadores`, con las columnas `nombre` y `puntaje` empleadas por las consultas. La base está alojada en Neon.
 
-### Pantalla de instrucciones
+**Seguridad:** no publiques la cadena de conexión ni credenciales de Neon en el repositorio. Antes de compartir el proyecto, configura las credenciales fuera del código fuente y rota la contraseña si alguna credencial real ya fue incluida en un commit.
 
-La pantalla de descripción se genera dinámicamente por código en `GameEngine::renderExplanationScreen()`. Es la vista previa de reglas y controles antes de empezar la partida. No tiene un archivo estático independiente, pero forma parte del flujo obligatorio del juego.
-
-### Nivel del juego
-
-![Nivel del juego](sources/pisonivel4.jpeg)
-
-La escena del nivel usa un estilo isométrico, con preguntas, tiles, movimiento y lógica de respuesta para cada jugador.
-
-### Pantalla final
-
-![Pantalla final](sources/fotomenufinal.jpeg)
-
-La pantalla final muestra los puntajes, el ganador o empate, y permite reiniciar el sistema para volver al menú principal.
-
-## Estructura de archivos
+## Estructura principal
 
 ```text
 lenguaje3/
-├── CMakeLists.txt
-├── Common.h
-├── Database.h
-├── Database.cpp
-├── GameEngine.h
-├── GameEngine.cpp
-├── Level.h
-├── LevelIsometric.h
-├── LevelIsometric.cpp
-├── main.cpp
+├── CMakeLists.txt          # Configuración de compilación con CMake
+├── Common.h                # Estados y datos compartidos del juego
+├── Database.h              # Interfaz de acceso a PostgreSQL
+├── Database.cpp            # Conexión, guardado y consulta del ranking
+├── GameEngine.h             # Declaración del motor del juego
+├── GameEngine.cpp           # Ciclo del juego, pantallas y entradas
+├── Level.h                  # Interfaz base para un nivel
+├── LevelIsometric.h         # Declaración del nivel jugable
+├── LevelIsometric.cpp       # Reglas y dibujo del nivel
+├── RobloxAvatar.h           # Representación de los jugadores
+├── IsoRenderer.h            # Funciones de dibujo isométrico
+├── main.cpp                 # Punto de entrada
 ├── README.md
-├── RobloxAvatar.h
-├── IsoRenderer.h
-├── sources/
-│   ├── audiojuego.mp3
-│   ├── fondomenu.jpeg
-│   ├── fotomenufinal.jpeg
-│   ├── parednivel4.jpg
-│   ├── parednivel4.webp
-│   ├── pisonivel4.jpeg
-│   └── ...
-├── build/
-└── ...
+└── sources/
+    ├── fotomenu.png         # Captura: menú principal
+    ├── descripcion.png      # Captura: instrucciones
+    ├── nivel.png            # Captura: nivel jugable
+    ├── final.png            # Captura: resultados finales
+    ├── audiojuego.mp3
+    ├── fondomenu.jpeg
+    ├── fotomenufinal.jpeg
+    ├── parednivel4.jpg
+    ├── parednivel4.webp
+    └── pisonivel4.jpeg
 ```
 
 ## Requisitos
@@ -154,62 +107,45 @@ lenguaje3/
 - Homebrew
 - CMake
 - SFML 3
-- PostgreSQL client library (`libpq`)
+- PostgreSQL `libpq`
+- Acceso a la base Neon configurada para la aplicación
 
-## Cómo ejecutar el proyecto en macOS
-
-1. Abrir una terminal en la raíz del proyecto.
-2. Instalar la dependencia de PostgreSQL:
+Instala las dependencias con Homebrew si aún no están disponibles:
 
 ```bash
-brew install libpq
+brew install cmake sfml libpq
 ```
 
-3. Configurar CMake apuntando a la librería de postgres instalada por Homebrew:
+## Compilar y ejecutar en macOS
+
+Ejecuta estos comandos desde la carpeta raíz del proyecto:
 
 ```bash
 cmake -S . -B build \
   -DPostgreSQL_INCLUDE_DIR="$(brew --prefix libpq)/include" \
   -DPostgreSQL_LIBRARY="$(brew --prefix libpq)/lib/libpq.dylib"
-```
-
-4. Compilar:
-
-```bash
 cmake --build build --parallel 2
-```
-
-5. Ejecutar la aplicación:
-
-```bash
 ./build/AutomataArcade
 ```
 
-## Nota importante sobre macOS
+La ruta del ejecutable corresponde al nombre de destino definido en `CMakeLists.txt`. Si CMake no encuentra SFML o `libpq`, confirma que las dependencias estén instaladas con Homebrew y vuelve a ejecutar la configuración de CMake.
 
-Este proyecto fue desarrollado y probado en un entorno macOS con Homebrew. Por esa razón, la configuración de PostgreSQL se realiza con `libpq` desde Homebrew y no con una instalación genérica de Linux o Windows. La apariencia y la ejecución de la ventana se basan en SFML 3, que está preparado para funcionar de forma nativa en macOS.
+## Base de datos
 
-## Base de datos Neon
+La aplicación espera que exista la tabla `public.jugadores` en Neon. Para comprobar sus columnas desde el SQL Editor de Neon:
 
-La persistencia del ranking se realiza con PostgreSQL en Neon. La lógica del programa intenta conectarse a la base de datos al arrancar y, al terminar una partida, guarda el nombre y el puntaje de cada jugador. Luego recupera los mejores registros para mostrarlos en la pantalla de inicio.
+```sql
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'jugadores'
+ORDER BY ordinal_position;
+```
 
-## Observaciones finales
+La aplicación inserta los nombres y puntajes de los dos jugadores al concluir el nivel y selecciona los registros ordenados de mayor a menor puntaje para el ranking.
 
-- El proyecto compila correctamente con la configuración adecuada de PostgreSQL.
-- El juego muestra y guarda resultados en la base de datos.
-- La fuente `sources/arial.ttf` no está presente en el proyecto, por eso se emite un aviso de carga, pero la aplicación sigue funcionando con fuentes del sistema.
-- Se recomienda no subir credenciales reales de Neon al repositorio; lo ideal es usar variables de entorno o archivos de configuración local no versionados.
+## Notas de ejecución
 
-## Créditos y propósito
-
-Este proyecto fue desarrollado como una práctica de programación en C++, integrando conceptos de:
-
-- programación orientada a objetos
-- interfaces gráficas con SFML
-- lógica de videojuegos
-- manejo de estados
-- persistencia de datos
-- trabajo con bases de datos relacionales
-
-Su objetivo es reforzar la construcción de un juego completo, con una estructura clara y con integración real de almacenamiento y ranking.
-
+- El README y las capturas usan rutas relativas al repositorio; conserva la carpeta `sources/` junto a los archivos del proyecto.
+- La aplicación puede informar que no encuentra `sources/arial.ttf`. Esa fuente no está incluida; el código intenta cargar fuentes alternativas del sistema.
+- El proyecto se ha configurado y probado en macOS con SFML 3 y `libpq` instalados por Homebrew.
