@@ -73,6 +73,10 @@ void GameEngine::init() {
         finalBackgroundSprite->setScale(sf::Vector2f(scaleX, scaleY));
     }
 
+    // Connect to database
+    database.connect();
+    topPlayers = database.getTopPlayers(3);
+
     isRunning = true;
     playMenuAudio();
 }
@@ -238,27 +242,39 @@ void GameEngine::renderMainMenu() {
     leaderboardTitle.setPosition(sf::Vector2f(1010.f, 510.f));
     window.draw(leaderboardTitle);
 
-    // Placeholder for leaderboard entries
-    sf::Text entry1(gameFont);
-    entry1.setString("1. -");
-    entry1.setCharacterSize(14);
-    entry1.setFillColor(sf::Color(255, 255, 255));
-    entry1.setPosition(sf::Vector2f(1010.f, 540.f));
-    window.draw(entry1);
+    // Show actual leaderboard entries
+    for (size_t i = 0; i < topPlayers.size() && i < 3; ++i) {
+        sf::Text entry(gameFont);
+        entry.setString(std::to_string(i + 1) + ". " + topPlayers[i].nombre + " - " + std::to_string(topPlayers[i].puntaje));
+        entry.setCharacterSize(14);
+        entry.setFillColor(sf::Color(255, 255, 255));
+        entry.setPosition(sf::Vector2f(1010.f, 540.f + i * 20.f));
+        window.draw(entry);
+    }
 
-    sf::Text entry2(gameFont);
-    entry2.setString("2. -");
-    entry2.setCharacterSize(14);
-    entry2.setFillColor(sf::Color(255, 255, 255));
-    entry2.setPosition(sf::Vector2f(1010.f, 560.f));
-    window.draw(entry2);
+    // Show placeholders if no data
+    if (topPlayers.empty()) {
+        sf::Text entry1(gameFont);
+        entry1.setString("1. -");
+        entry1.setCharacterSize(14);
+        entry1.setFillColor(sf::Color(255, 255, 255));
+        entry1.setPosition(sf::Vector2f(1010.f, 540.f));
+        window.draw(entry1);
 
-    sf::Text entry3(gameFont);
-    entry3.setString("3. -");
-    entry3.setCharacterSize(14);
-    entry3.setFillColor(sf::Color(255, 255, 255));
-    entry3.setPosition(sf::Vector2f(1010.f, 580.f));
-    window.draw(entry3);
+        sf::Text entry2(gameFont);
+        entry2.setString("2. -");
+        entry2.setCharacterSize(14);
+        entry2.setFillColor(sf::Color(255, 255, 255));
+        entry2.setPosition(sf::Vector2f(1010.f, 560.f));
+        window.draw(entry2);
+
+        sf::Text entry3(gameFont);
+        entry3.setString("3. -");
+        entry3.setCharacterSize(14);
+        entry3.setFillColor(sf::Color(255, 255, 255));
+        entry3.setPosition(sf::Vector2f(1010.f, 580.f));
+        window.draw(entry3);
+    }
 }
 
 void GameEngine::renderExplanationScreen() {
@@ -488,6 +504,13 @@ void GameEngine::update(float dt) {
         currentLevel->update(dt);
 
         if (currentLevel->isFinished()) {
+            // Save both players to database
+            database.savePlayer(context.player1Name, context.player1Score);
+            database.savePlayer(context.player2Name, context.player2Score);
+
+            // Refresh leaderboard
+            topPlayers = database.getTopPlayers(3);
+
             transitionToState(GameState::FINAL_SCORE);
             currentLevel = nullptr;
         }
