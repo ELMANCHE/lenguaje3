@@ -78,7 +78,7 @@ void GameEngine::init() {
 }
 
 void GameEngine::playMenuAudio() {
-    if (!audioMenu.openFromFile("sources/audiomenu.mp3")) {
+    if (!audioMenu.openFromFile("sources/audiojuego.mp3")) {
         // Si falla, continuar sin audio
     }
     audioMenu.play();
@@ -101,17 +101,8 @@ void GameEngine::stopGameAudio() {
 
 void GameEngine::transitionToState(GameState newState) {
     context.currentState = newState;
-    
-    if (newState == GameState::EXPLANATION_SCREEN) {
-        // SFML 3.x: getStatus() retorna sf::SoundSource::Status (enum)
-        if (audioMenu.getStatus() == sf::SoundSource::Status::Playing) stopMenuAudio();
-        if (audioGame.getStatus() != sf::SoundSource::Status::Playing) playGameAudio();
-    }
-    else if (newState == GameState::MAIN_MENU) {
-        if (audioGame.getStatus() == sf::SoundSource::Status::Playing) stopGameAudio();
-        if (audioMenu.getStatus() != sf::SoundSource::Status::Playing) playMenuAudio();
-    }
-    else if (newState == GameState::FINAL_SCORE) {
+
+    if (newState == GameState::FINAL_SCORE) {
         restartBlink = 0.f;
     }
 }
